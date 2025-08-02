@@ -1,29 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
+	"net/http"
 
-	"github.com/joho/godotenv"
 	"github.com/darkphotonKN/go-figma-mcp/config"
+	_ "github.com/joho/godotenv" // load env vars
 )
 
 func main() {
-	// Load environment variables
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
+	// load configuration
+	err := config.LoadConfig()
 
-	// Load configuration
-	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal("Failed to load configuration:", err)
 	}
 
-	// TODO: Initialize MCP server
-	// TODO: Register tools and resources
-	// TODO: Start server
+	port := ":8080"
+	fmt.Printf("Server starting on port %s\n", port)
 
-	log.Printf("Starting %s v%s", cfg.Server.Name, cfg.Server.Version)
-	log.Println("MCP server implementation to be added")
+	if err := http.ListenAndServe(port, nil); err != nil {
+		log.Fatal("Server failed to start:", err)
+	}
 }
+

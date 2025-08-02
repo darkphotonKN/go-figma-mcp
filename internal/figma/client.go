@@ -1,24 +1,27 @@
 package figma
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
 
-// Client represents an external API client
 type Client struct {
 	baseURL    string
+	apiKey     string
 	httpClient *http.Client
 }
 
-// NewClient creates a new API client
-func NewClient(baseURL string) *Client {
+func NewClient(apiKey string) *Client {
 	return &Client{
-		baseURL: baseURL,
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		baseURL:    "https://api.figma.com/v1",
+		apiKey:     apiKey,
+		httpClient: &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
-// TODO: Add specific API methods as needed
+func (c *Client) GetFileInfo(fileID string) error {
+	// TODO: Implement actual Figma API call
+	fmt.Printf("Would fetch file info for: %s\n", fileID)
+	return nil
+}
