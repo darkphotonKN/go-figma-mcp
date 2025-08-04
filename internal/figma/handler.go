@@ -1,22 +1,29 @@
 package figma
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Handler handles HTTP requests for the domain
 type Handler struct {
-	service Service
+	service     HandlerService
+	figmaClient FigmaClient
 }
 
-// NewHandler creates a new handler instance
+type HandlerService interface {
+	GetFileInfo(ctx context.Context, fileID string) error
+}
+
+type FigmaClient interface {
+	GetFileInfo(fileID string) error
+}
+
 func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
-// GetFileInfo handles GET /files/:id requests
 func (h *Handler) GetFileInfo(c *gin.Context) {
 	fileID := c.Param("id")
 	if fileID == "" {
@@ -24,7 +31,15 @@ func (h *Handler) GetFileInfo(c *gin.Context) {
 		return
 	}
 
-	err := h.service.GetFileInfo(c.Request.Context(), fileID)
+	err := h.figmaClient.GetFileInfo(fileID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "file ID could not be retrieved, with error: " + err.Error()})
+		return
+	}
+
+	err = h.service.GetFileInfo(c.Request.Context(), fileID)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
