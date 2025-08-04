@@ -1,17 +1,34 @@
 package figma
 
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+// Handler handles HTTP requests for the domain
 type Handler struct {
-	client  HandlerClient
-	service HandlerService
+	service Service
 }
 
-type HandlerClient interface {
-	GetFileInfo(fileID string) error
+// NewHandler creates a new handler instance
+func NewHandler(service Service) *Handler {
+	return &Handler{service: service}
 }
 
-type HandlerService interface {
-}
+// GetFileInfo handles GET /files/:id requests
+func (h *Handler) GetFileInfo(c *gin.Context) {
+	fileID := c.Param("id")
+	if fileID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "file ID is required"})
+		return
+	}
 
-func NewHandler(service HandlerService) *Handler {
-	return &Handler{}
+	err := h.service.GetFileInfo(c.Request.Context(), fileID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "File info retrieved", "file_id": fileID})
 }
