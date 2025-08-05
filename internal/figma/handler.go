@@ -8,20 +8,17 @@ import (
 )
 
 type Handler struct {
-	service     HandlerService
-	figmaClient FigmaClient
+	service HandlerService
 }
 
 type HandlerService interface {
 	GetFileInfo(ctx context.Context, fileID string) error
 }
 
-type FigmaClient interface {
-	GetFileInfo(fileID string) error
-}
-
 func NewHandler(service Service) *Handler {
-	return &Handler{service: service}
+	return &Handler{
+		service: service,
+	}
 }
 
 func (h *Handler) GetFileInfo(c *gin.Context) {
@@ -31,14 +28,7 @@ func (h *Handler) GetFileInfo(c *gin.Context) {
 		return
 	}
 
-	err := h.figmaClient.GetFileInfo(fileID)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "file ID could not be retrieved, with error: " + err.Error()})
-		return
-	}
-
-	err = h.service.GetFileInfo(c.Request.Context(), fileID)
+	err := h.service.GetFileInfo(c.Request.Context(), fileID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -35,14 +35,19 @@ func (c *Client) fetchFigmaFile(fileKey string) error {
 	url := fmt.Sprintf("https://api.figma.com/v1/files/%s", fileKey)
 
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	fmt.Printf("\napiKey: %s\n\n", c.apiKey)
+	req.Header.Set("X-Figma-Token", c.apiKey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
+
 	if err != nil {
+		fmt.Println("err when reading response from figma files api request:", resp)
 		return err
 	}
 	defer resp.Body.Close()
+
+	fmt.Println("resp initial:", resp)
 
 	body, _ := io.ReadAll(resp.Body)
 	fmt.Printf("\n\nFigma File Response: %s\n\n", string(body))
